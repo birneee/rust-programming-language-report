@@ -11,16 +11,20 @@ lazy_static = "1.3.0"
 
 [[bin]]
 name = "stack"
-path = "src/stack/main.rs"
+path = "src/stack.rs"
 
 [[bin]]
 name = "tree"
-path = "src/tree/main.rs"
+path = "src/tree.rs"
 
 [[bin]]
 name = "parking"
-path = "src/parking/main.rs"
+path = "src/parking.rs"
 
 [[bin]]
 name = "playground"
-path = "src/playground/main.rs"
+path = "src/playground.rs"
+
+[[bin]]
+name = "hello"
+path = "src/hello.rs"
