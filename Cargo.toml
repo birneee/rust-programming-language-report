@@ -10,12 +10,20 @@ lazy_static = "1.3.0"
 #threadpool = "1.0"
 
 [[bin]]
-name = "stack"
-path = "src/stack.rs"
+name = "channels"
+path = "src/channels.rs"
 
 [[bin]]
-name = "tree"
-path = "src/tree.rs"
+name = "hashing"
+path = "src/hashing.rs"
+
+[[bin]]
+name = "higherorderfunctions"
+path = "src/higherorderfunction.rs"
+
+[[bin]]
+name = "mutex"
+path = "src/mutex.rs"
 
 [[bin]]
 name = "parking"
@@ -26,5 +34,27 @@ name = "playground"
 path = "src/playground.rs"
 
 [[bin]]
-name = "hello"
-path = "src/hello.rs"
+name = "shape"
+path = "src/shape.rs"
+
+[[bin]]
+name = "stack"
+path = "src/stack.rs"
+
+[[bin]]
+name = "thread"
+path = "src/thread.rs"
+
+[[bin]]
+name = "tree"
+path = "src/tree.rs"
+
+[[bin]]
+name = "vector"
+path = "src/vector.rs"
+
+
+
+
+
+
