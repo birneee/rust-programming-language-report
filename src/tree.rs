@@ -1,53 +1,48 @@
 fn main() {
-    let tree = BinaryTree {
-        root: Some(Box::new(Node {
-            data: Box::new(50),
-            left: Some(Box::new(Node {
-                data: Box::new(20),
-                left: Some(Box::new(Node {
-                    data: Box::new(3),
-                    left: None,
-                    right: Some(Box::new(Node {
-                        data: Box::new(9),
-                        left: None,
-                        right: None,
-                    })),
-                })),
-                right: None,
-            })),
-            right: Some(Box::new(Node {
-                data: Box::new(80),
-                left: Some(Box::new(Node {
-                    data: Box::new(70),
-                    left: None,
-                    right: Some(Box::new(Node {
-                        data: Box::new(79),
-                        left: None,
-                        right: None,
-                    })),
-                })),
-                right: Some(Box::new(Node {
-                    data: Box::new(100),
-                    left: None,
-                    right: None,
-                })),
-            })),
-        }))
-    };
+    let tree = BinaryTree::new(
+        Some(Node::new(
+            50,
+            Some(Node::new(
+                20,
+                Some(Node::new(
+                    3,
+                    None,
+                    Some(Node::new(
+                        9,
+                        None,
+                        None)))),
+                None)),
+            Some(Node::new(
+                80,
+                Some(Node::new(
+                    70,
+                    None,
+                    Some(Node::new(
+                        79,
+                        None,
+                        None)))),
+                Some(Node::new(
+                    100,
+                    None,
+                    None)))))));
 
-    println!("\npre-order");
+    println!("pre-order");
     tree.for_each_pre_order(|n| {
-        println!("{}", n);
+        print!("{} ", n);
     });
 
-    println!("\nin-order");
+    println!("");
+
+    println!("in-order");
     tree.for_each_in_order(|n| {
-        println!("{}", n);
+        print!("{} ", n);
     });
 
-    println!("\npost-order");
+    println!("");
+
+    println!("post-order");
     tree.for_each_post_order(|n| {
-        println!("{}", n);
+        print!("{} ", n);
     });
 }
 
@@ -58,6 +53,19 @@ struct Node<T> {
 }
 
 impl<T> Node<T> {
+    fn new(data: T, left: Option<Node<T>>, 
+                right: Option<Node<T>>) -> Node<T>{
+        Node{
+            data: Box::new(data),
+            left: left.map(|left|{
+                Box::new(left)
+            }),
+            right: right.map(|right|{
+                Box::new(right)
+            })
+        }
+    }
+
     fn for_each_pre_order<F: Fn(&T)>(&self, action: &F) {
         action(&*self.data);
         if let Some(left) = &self.left {
@@ -94,6 +102,14 @@ struct BinaryTree<T> {
 }
 
 impl<T> BinaryTree<T> {
+    fn new(root: Option<Node<T>>) -> BinaryTree<T>{
+        BinaryTree{
+            root: root.map(|root|{
+                Box::new(root)
+            })
+        }
+    }
+
     fn for_each_pre_order<F: Fn(&T)>(&self, action: F) {
         if let Some(root) = &self.root {
             root.for_each_pre_order(&action)

@@ -19,6 +19,6 @@ fn main(){
     drop(tx);
 
     for message in rx{
-        print!("{}", message);
+        print!("{} ", message);
     }
-}
+}  

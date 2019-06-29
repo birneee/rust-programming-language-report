@@ -1,6 +1,6 @@
 fn main() {
     let mut stack: Stack<u8> = Stack::new();
-    for i in 0 .. u8::max_value() {
+    for i in 0 .. 4 {
         stack.push(i);
         println!("push {}", i);
     }
@@ -36,7 +36,8 @@ impl<T> Stack<T> {
     }
 
     fn pop(&mut self) -> Option<T> {
-        self.head.take().map(|mut head| {
+        let head = self.head.take();
+        head.map(|mut head| {
             self.head = head.next.take();
             head.data
         })

@@ -1,97 +1,74 @@
 extern crate rand;
 use rand::Rng;
 use std::{thread, time};
-use std::sync::{Condvar, Mutex};
-use lazy_static::lazy_static;
-use time::Duration;
+use std::sync::{Arc, Condvar, Mutex};
 
-const PARKING_SPOTS: u32 = 100;
-const CARS: u32 = 1000;
-const LETTERS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-lazy_static! {
-    static ref MUTEX: Mutex<u32> = Mutex::new(PARKING_SPOTS);
-    static ref COND: Condvar = Condvar::new();
-}
+const PARKING_SPACES: u32 = 3;
+const CARS: u32 = 5;
 
 fn main(){
-    let mut threads = vec![];
-
-    for _ in 0..CARS{
-        threads.push(thread::spawn(||{
-            let car = Car::new();
+    let mut join_handles = Vec::with_capacity(CARS as usize);
+    let mutex = Mutex::new(PARKING_SPACES);
+    let cond = Condvar::new();
+    let mutcond = Arc::new((mutex, cond));
+    
+    for i in 0..CARS{
+        let mutcond = mutcond.clone();
+        let handle = thread::spawn(move ||{
+            let car = Car::new(mutcond, i);
             car.park();
-            thread::sleep(random_duration(100, 1000));
+            car.shop();
             car.unpark();
-        }));
+        });
+        join_handles.push(handle);
     }
 
-    for thread in threads{
-        thread.join().expect("The thread being joined has panicked");
+    for handle in join_handles{
+        handle.join().expect("Thread join panicked");
     }
 }
 
 struct Car{
-    license_plate: String
+    mutcond: Arc<(Mutex<u32>, Condvar)>,
+    number: u32
 }
 
 impl Car{
-    fn new() -> Car {
+    fn new(mutcond: Arc<(Mutex<u32>, Condvar)>, number: u32) -> Car {
         Car{
-            license_plate: random_license_plate()
+            mutcond: mutcond,
+            number: number
         }
     }
 
     fn park(&self){
-        println!("{}: searching for parking spot", self.license_plate);
-        {
-            let mut free_spots = MUTEX.lock().unwrap();
-            while *free_spots == 0 {
-                println!("{}: waiting for free spot", self.license_plate);
-                free_spots = COND.wait(free_spots).unwrap();
-                println!("{}: waking up ({} free spots)", self.license_plate, free_spots);
-            }
-            *free_spots -= 1;
-            println!("{}: parking ({} free spots)", self.license_plate, free_spots);
+        let (ref mutex, ref cond) = *self.mutcond;
+        let mut free_spaces = mutex.lock().unwrap();
+        println!("CAR {}: searching for parking space", self.number);
+        println!("CAR {}: found {} free parking spaces", self.number, free_spaces);
+        while *free_spaces == 0 {
+            println!("CAR {}: waiting for free space", self.number);
+            free_spaces = cond.wait(free_spaces).unwrap();
+            println!("CAR {}: waking up", self.number);
+            println!("CAR {}: searching for parking space", self.number);
+            println!("CAR {}: found {} free parking spaces", self.number, free_spaces);
         }
+        *free_spaces -= 1;
+        println!("CAR {}: parking", self.number);
+    }
+
+    fn shop(&self){
+        let mut rng = rand::thread_rng();
+        let time = rng.gen_range(100, 1000);
+        println!("CAR {}: go shopping for {} ms", self.number, time);
+        thread::sleep_ms(time);
     }
 
     fn unpark(&self){
-        let mut free_spots = MUTEX.lock().unwrap();
-        *free_spots += 1;
-        println!("{}: unparking ({} free spots)", self.license_plate, free_spots);
-        COND.notify_one();
+        let (ref mutex, ref cond) = *self.mutcond;
+        let mut free_spaces = mutex.lock().unwrap();
+        *free_spaces += 1;
+        println!("CAR {}: unparking", self.number);
+        cond.notify_one();
     }
-}
-
-fn random_license_plate() -> String{
-    let mut lp = "LA-".to_string();
-    for _ in 0..2 {
-        lp.push(random_letter());
-    }
-    lp.push('-');
-    lp.push_str(random_number(1000, 9999).to_string().as_str());
-    lp
-}
-
-fn random_duration(min_ms: u64, max_ms: u64) -> Duration{
-    Duration::from_millis(
-        random_number(
-            min_ms,
-            max_ms))
-}
-
-fn random_number(min: u64, max: u64) -> u64{
-    let mut rng = rand::thread_rng();
-    rng.gen_range(min, max)
-}
-
-fn random_letter() -> char{
-    char::from(*LETTERS
-        .get(
-            random_number(
-                0,
-                LETTERS.len() as u64
-            ) as usize)
-        .unwrap())
 }
