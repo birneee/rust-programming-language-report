@@ -60,7 +60,7 @@ impl Car{
     fn shop(&self){
         let mut rng = rand::thread_rng();
         let time = rng.gen_range(100, 1000);
-        println!("CAR {}: go shopping for {} ms", self.number, time);
+        println!("CAR {}: shopping for {} ms", self.number, time);
         thread::sleep_ms(time);
     }
 

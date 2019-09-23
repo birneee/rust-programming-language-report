@@ -47,7 +47,7 @@ fn main() {
 }
 
 struct Node<T> {
-    data: Box<T>,
+    data: T,
     left: Option<Box<Node<T>>>,
     right: Option<Box<Node<T>>>,
 }
@@ -56,7 +56,7 @@ impl<T> Node<T> {
     fn new(data: T, left: Option<Node<T>>, 
                 right: Option<Node<T>>) -> Node<T>{
         Node{
-            data: Box::new(data),
+            data: data,
             left: left.map(|left|{
                 Box::new(left)
             }),
@@ -67,7 +67,7 @@ impl<T> Node<T> {
     }
 
     fn for_each_pre_order<F: Fn(&T)>(&self, action: &F) {
-        action(&*self.data);
+        action(&self.data);
         if let Some(left) = &self.left {
             left.for_each_in_order(action)
         }
@@ -80,7 +80,7 @@ impl<T> Node<T> {
         if let Some(left) = &self.left {
             left.for_each_in_order(action)
         }
-        action(&*self.data);
+        action(&self.data);
         if let Some(right) = &self.right {
             right.for_each_in_order(action)
         }
@@ -93,7 +93,7 @@ impl<T> Node<T> {
         if let Some(right) = &self.right {
             right.for_each_in_order(action)
         }
-        action(&*self.data);
+        action(&self.data);
     }
 }
 
